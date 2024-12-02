@@ -27,7 +27,7 @@
                         <input
                             type="text"
                             readonly
-                            value='<script data-site="{{ website.id }}" src="//{{ request.get_host }}/script.js" defer></script>'
+                            value='<script data-site="{{ website.id }}" src="{{ request.scheme }}://{{ request.get_host }}/script.js" defer></script>'
                             class="w-full h-10 bg-gray-100 px-3 rounded border border-gray-200 text-gray-600 text-sm focus:outline-none focus:ring-2 focus:ring-blue-300"
                         >
                     </div>
