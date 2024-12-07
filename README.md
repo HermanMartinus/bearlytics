@@ -83,17 +83,20 @@ A: The database is stored in a SQLite database file on your server. You can back
 **Q: Can I pay you to host my analytics?**  
 A: No, but if it's something you're interested in, let me know by commenting on [this issue](https://github.com/HermanMartinus/bearlytics/issues/1), and I may add it to [the roadmap](ROADMAP.md).
 
-## Self-hosting Guide
+## Self-hosting Guides
 
-This is a basic Django app that can be deployed to any platform that supports Django. I've chosen Dokku for this guide because it's easy to set up and manage, and I'm familiar with it.
+This is a basic Django app that can be deployed to any platform that supports Django.
 
-### Prerequisites
+### Dokku
+I've chosen Dokku for this guide because it's easy to set up and manage, and I'm familiar with it.
+
+#### Prerequisites
 
 - A Dokku server
 - Basic knowledge of terminal commands
 - A cup of coffee
 
-### Step 1: Dokku Setup 
+#### Step 1: Dokku Setup
 
 ```bash
 # Create the app
@@ -111,7 +114,7 @@ dokku config:set SALT_SECRET=your_very_secret_salt_here
 dokku config:set DEBUG=False
 ```
 
-### Step 2: Deploy
+#### Step 2: Deploy
 
 Add Dokku as a remote and commit and push your code
 ```bash
@@ -119,7 +122,7 @@ git remote add dokku dokku@your-server:analytics
 git push dokku main
 ```
 
-### Step 3: Add Your First Website
+#### Step 3: Add Your First Website
 
 1. Visit `https://your-analytics-domain.com`
 2. Create an account (if no user exists, the first user will be automatically promoted to admin)
@@ -127,6 +130,51 @@ git push dokku main
 4. Copy the tracking script
 5. Add it to your website's `<head>` section
 6. Watch those sweet, sweet analytics roll in
+
+### Docker
+For hosting with Docker Compose:
+
+1. Create a directory to hold the configuration .
+    ```shell
+    mkdir -p /opt/bearlytics
+    ```
+2. Create a subfolder `analytics/` to store the data.
+3. Create a `.env` file with (at least):
+    ```shell
+    SECRET_KEY=your_django_secret_key
+    SALT_SECRET=your_secret_salt
+    ```
+4. Review [docker-compose.yaml](docker-compose.yaml) for any other needed changes, such as adjusting the `UID`/`GID` to match the ownership of the `analytics/` directory:
+    ```yaml
+    services:
+      bearlytics:
+        image: ghcr.io/HermanMartinus/bearlytics:latest
+        ports:
+        - 8000:8000
+        volumes:
+        - ./analytics:/app/data
+        environment:
+          CSRF_TRUSTED_ORIGINS: ${CSRF_TRUSTED_ORIGINS:-http://localhost}
+          DB_PATH: ${DB_PATH:-/app/data/analytics.db}
+          DEBUG: False
+          SALT_SECRET: ${SALT_SECRET:?err}
+          SECRET_KEY: ${SECRET_KEY:?err}
+          UID: 1000
+          GID: 1000
+        restart: unless-stopped
+    ```
+5. Deploy the app:
+    ```shell
+    docker compose up -d
+    ```
+
+For production deployments, serve Bearlytics behind a reverse proxy like [Caddy](https://caddyserver.com/docs/quick-starts/reverse-proxy) or [nginx](https://docs.nginx.com/nginx/admin-guide/web-server/reverse-proxy/). A Caddy configuration could be as simple as:
+
+```
+bearlytics.example.com {
+  reverse_proxy http://localhost:8000
+}
+```
 
 ## Tracking Script
 

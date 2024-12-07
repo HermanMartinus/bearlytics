@@ -1,0 +1,17 @@
+services:
+  bearlytics:
+    image: ghcr.io/HermanMartinus/bearlytics:latest
+    ports:
+    - 8000:8000
+    volumes:
+    - ./analytics:/app/data
+    environment:
+      CSRF_TRUSTED_ORIGINS: ${CSRF_TRUSTED_ORIGINS:-http://localhost}
+      DB_PATH: ${DB_PATH:-/app/data/analytics.db}
+      DEBUG: False
+      SALT_SECRET: ${SALT_SECRET:?err}
+      SECRET_KEY: ${SECRET_KEY:?err}
+      UID: 1000
+      GID: 1000
+    restart: unless-stopped
+

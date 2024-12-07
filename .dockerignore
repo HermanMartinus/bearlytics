@@ -1,0 +1,12 @@
+.dockerignore
+.env
+.gitattributes
+.gitignore
+analytics
+docker-compose.yaml
+Dockerfile
+Makefile
+Procfile
+README.md
+ROADMAP.md
+screenshot.png
