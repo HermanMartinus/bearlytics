@@ -148,7 +148,7 @@ For hosting with Docker Compose:
     ```yaml
     services:
       bearlytics:
-        image: ghcr.io/HermanMartinus/bearlytics:latest
+        image: ghcr.io/hermanmartinus/bearlytics:latest
         ports:
         - 8000:8000
         volumes:
