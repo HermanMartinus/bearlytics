@@ -1,7 +1,7 @@
 FROM python:3-slim
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
-  curl=7.88.1-10+deb12u8 && \
+  curl && \
   rm -rf /var/lib/apt/lists/* && \
   groupadd -g 1000 bear && \
   useradd -u 1000 -g 1000 -m -s /bin/bash bear && \

@@ -6,14 +6,13 @@
 <style>
     table { width: 100%; border-collapse: collapse; }
     th, td { border: 1px solid black; padding: 8px; text-align: left; }
-    th { background-color: #f2f2f2; }
 </style>
 {% endblock %}
 
 {% block content %}
-<h1>All Page Hits</h1>
+<h1 class="dark:text-white">All Page Hits</h1>
 <table>
-    <tr>
+  <tr class="bg-slate-50 dark:bg-slate-400">
         <th>Project</th>
         <th>Hash_ID</th>
         <th>Path</th>
@@ -25,7 +24,7 @@
         <th>Timestamp</th>
     </tr>
     {% for hit in hits %}
-    <tr>
+    <tr class="dark:bg-slate-300">
         <td>{{ hit.website.name }}</td>
         <td>{{ hit.hash_id }}</td>
         <td>{{ hit.path }}</td>

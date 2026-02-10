@@ -14,13 +14,13 @@
     {% endfor %}
 {% endif %}
 
-<div class="bg-white rounded-lg shadow-md">
+<div class="bg-white dark:bg-gray-900 rounded-lg shadow-md">
     <div class="p-6 ">
-        <h2 class="text-xl text-gray-700 mb-6">Your Websites</h2>
+        <h2 class="text-xl text-gray-700 dark:text-white mb-6">Your Websites</h2>
         <ul class="divide-y divide-gray-100">
             {% for website in websites %}
             <li class="flex flex-wrap gap-4 items-center justify-between py-3">
-                <div class="flex-none text-gray-800 font-medium min-w-[200px]">{{ website.name }}</div>
+                <div class="flex-none text-gray-800 dark:text-gray-200 font-medium min-w-[200px]">{{ website.name }}</div>
                 
                 <div class="flex flex-wrap gap-4 items-center justify-end flex-1 min-w-[300px]">
                     <div class="flex-1 max-w-[600px]">
@@ -61,13 +61,13 @@
 
 <br><br>
 <!-- Add Website Form -->
-<div class="bg-white rounded-lg shadow-md">
+<div class="bg-white dark:bg-gray-900 rounded-lg shadow-md">
     <div class="p-6">
-        <h2 class="text-xl text-gray-700 mb-6">Add Website</h2>
+        <h2 class="text-xl text-gray-700 dark:text-white mb-6">Add Website</h2>
         <form method="POST" action="{% url 'websites' %}" class="space-y-4">
             {% csrf_token %}
             <div>
-                <label for="website_name" class="block text-sm font-medium text-gray-700">Website Name</label>
+                <label for="website_name" class="block text-sm font-medium text-gray-700 dark:text-gray-200">Website Name</label>
                 <input
                     type="text"
                     id="website_name"

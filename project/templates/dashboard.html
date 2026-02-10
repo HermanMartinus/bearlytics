@@ -18,7 +18,7 @@
     </a>
     <br>
 </p>
-<h2 class="text-xl text-gray-700 mb-8">Website: {{ website.name }}</h2>
+<h2 class="text-xl text-gray-700 mb-8 dark:text-gray-400">Website: {{ website.name }}</h2>
 
 
 <form id="timeRangeForm" action="{% url 'dashboard' website_id=website.id %}" method="get" class="mb-8">
@@ -52,7 +52,7 @@
 {% if path_filter %}
 <div class="mb-8">
     <div class="flex items-center gap-2">
-        <span class="text-gray-600">Filtering by path:</span>
+        <span class="text-gray-600 dark:text-gray-400">Filtering by path:</span>
         <span class="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm font-medium">
             {{ path_filter }}
             <a href="{% url 'dashboard' website_id=website.id %}?range={{ selected_range }}{% if referrer_filter %}&referrer={{ referrer_filter|urlencode }}{% endif %}" class="ml-2 text-blue-600 hover:text-blue-800">×</a>
@@ -64,7 +64,7 @@
 {% if referrer_filter %}
 <div class="mb-8">
     <div class="flex items-center gap-2">
-        <span class="text-gray-600">Filtering by referrer:</span>
+        <span class="text-gray-600 dark:text-gray-400">Filtering by referrer:</span>
         <span class="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm font-medium">
             {{ referrer_filter }}
             <a href="{% url 'dashboard' website_id=website.id %}?range={{ selected_range }}{% if path_filter %}&path={{ path_filter|urlencode }}{% endif %}" class="ml-2 text-blue-600 hover:text-blue-800">×</a>
@@ -74,59 +74,59 @@
 {% endif %}
 
 <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
-    <div class="bg-white p-6 rounded-lg shadow-md">
-        <h2 class="text-sm text-gray-600 mb-2">Views</h2>
-        <p class="text-2xl font-semibold text-gray-800">{{ stats.views }}</p>
+    <div class="bg-white dark:bg-gray-900 p-6 rounded-lg shadow-md">
+        <h2 class="text-sm text-gray-600 dark:text-gray-200 mb-2">Views</h2>
+        <p class="text-2xl font-semibold text-gray-800 dark:text-gray-200">{{ stats.views }}</p>
     </div>
-    <div class="bg-white p-6 rounded-lg shadow-md">
-        <h2 class="text-sm text-gray-600 mb-2">Visits</h2>
-        <p class="text-2xl font-semibold text-gray-800">{{ stats.visits }}</p>
+    <div class="bg-white dark:bg-gray-900 p-6 rounded-lg shadow-md">
+        <h2 class="text-sm text-gray-600 dark:text-gray-200 mb-2">Visits</h2>
+        <p class="text-2xl font-semibold text-gray-800 dark:text-gray-200">{{ stats.visits }}</p>
     </div>
-    <div class="bg-white p-6 rounded-lg shadow-md">
-        <h2 class="text-sm text-gray-600 mb-2">Visitors</h2>
-        <p class="text-2xl font-semibold text-gray-800">{{ stats.visitors }}</p>
+    <div class="bg-white dark:bg-gray-900 p-6 rounded-lg shadow-md">
+        <h2 class="text-sm text-gray-600 dark:text-gray-200 dark: mb-2">Visitors</h2>
+        <p class="text-2xl font-semibold text-gray-800 dark:text-gray-200">{{ stats.visitors }}</p>
     </div>
 </div>
 
-<div class="bg-white p-6 rounded-lg shadow-md mb-8 h-[400px]">
+<div class="bg-white dark:bg-gray-900 p-6 rounded-lg shadow-md mb-8 h-[400px]">
     <canvas id="viewsChart"></canvas>
 </div>
 
 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-    <div class="bg-white p-6 rounded-lg shadow-md">
+    <div class="bg-white dark:bg-gray-900 p-6 rounded-lg shadow-md">
         <ul class="divide-y divide-gray-100">
-            <li class="flex justify-between items-center py-2 sticky top-0 bg-white">
-                <span class="text-gray-600">Path</span>
-                <span class="text-gray-600">Visits</span>
+            <li class="flex justify-between items-center py-2 sticky top-0 bg-white dark:bg-slate-900">
+                <span class="text-gray-600 dark:text-gray-200">Path</span>
+                <span class="text-gray-600 dark:text-gray-200">Visits</span>
             </li>
             <div class="h-[300px] overflow-y-auto">
                 {% for page in top_pages %}
                 <li class="flex justify-between items-center py-2">
                     <a href="?range={{ selected_range }}{% if referrer_filter %}&referrer={{ referrer_filter|urlencode }}{% endif %}&path={{ page.path|urlencode }}" 
-                        class="text-gray-600 hover:text-blue-600 transition-colors">
+                        class="text-gray-600 dark:text-gray-400 hover:text-blue-600 hover:dark:text-blue-400 transition-colors">
                         {{ page.path }}
                     </a>
-                    <span class="text-gray-800">{{ page.visits }}</span>
+                    <span class="text-gray-800 dark:text-gray-200">{{ page.visits }}</span>
                 </li>
                 {% endfor %}
             </div>
         </ul>
     </div>
 
-    <div class="bg-white p-6 rounded-lg shadow-md">
+    <div class="bg-white dark:bg-gray-900 p-6 rounded-lg shadow-md">
         <ul class="divide-y divide-gray-100">
-            <li class="flex justify-between items-center py-2 sticky top-0 bg-white">
-                <span class="text-gray-600">Referrer</span>
-                <span class="text-gray-600">Visitors</span>
+            <li class="flex justify-between items-center py-2 sticky top-0 bg-white dark:bg-slate-900">
+                <span class="text-gray-600 dark:text-gray-200">Referrer</span>
+                <span class="text-gray-600 dark:text-gray-200">Visitors</span>
             </li>
             <div class="h-[300px] overflow-y-auto">
                 {% for ref in top_referrers %}
                 <li class="flex justify-between items-center py-2">
                     <a href="?range={{ selected_range }}{% if path_filter %}&path={{ path_filter|urlencode }}{% endif %}&referrer={{ ref.referrer|urlencode }}" 
-                        class="text-gray-600 hover:text-blue-600 transition-colors">
+                        class="text-gray-600 dark:text-gray-400 hover:text-blue-600 hover:dark:text-blue-400 transition-colors">
                         {{ ref.referrer }}
                     </a>
-                    <span class="text-gray-800">{{ ref.visits }}</span>
+                    <span class="text-gray-800 dark:text-gray-200">{{ ref.visits }}</span>
                 </li>
                 {% endfor %}
             </div>
@@ -134,51 +134,51 @@
     </div>
 
     <div class="md:col-span-2 grid grid-cols-1 md:grid-cols-3 gap-6">
-        <div class="bg-white p-6 rounded-lg shadow-md">
+        <div class="bg-white dark:bg-gray-900 p-6 rounded-lg shadow-md">
             <ul class="divide-y divide-gray-100">
-                <li class="flex justify-between items-center py-2 sticky top-0 bg-white">
-                    <span class="text-gray-600">Country</span>
-                    <span class="text-gray-600">Visitors</span>
+                <li class="flex justify-between items-center py-2 sticky top-0 bg-white dark:bg-slate-900">
+                    <span class="text-gray-600 dark:text-gray-200">Country</span>
+                    <span class="text-gray-600 dark:text-gray-200">Visitors</span>
                 </li>
                 <div class="h-[300px] overflow-y-auto">
                     {% for country in top_countries %}
                     <li class="flex justify-between items-center py-2">
-                        <span class="text-gray-600">{{ country.country }}</span>
-                        <span class="text-gray-800">{{ country.visits }}</span>
+                        <span class="text-gray-600 dark:text-gray-400">{{ country.country }}</span>
+                        <span class="text-gray-800 dark:text-gray-200">{{ country.visits }}</span>
                     </li>
                     {% endfor %}
                 </div>
             </ul>
         </div>
 
-        <div class="bg-white p-6 rounded-lg shadow-md">
+        <div class="bg-white dark:bg-gray-900 p-6 rounded-lg shadow-md">
             <ul class="divide-y divide-gray-100">
-                <li class="flex justify-between items-center py-2 sticky top-0 bg-white">
-                    <span class="text-gray-600">Device</span>
-                    <span class="text-gray-600">Visitors</span>
+                <li class="flex justify-between items-center py-2 sticky top-0 bg-white dark:bg-slate-900">
+                    <span class="text-gray-600 dark:text-gray-200">Device</span>
+                    <span class="text-gray-600 dark:text-gray-200">Visitors</span>
                 </li>
                 <div class="h-[300px] overflow-y-auto">
                     {% for device in top_devices %}
                     <li class="flex justify-between items-center py-2">
-                        <span class="text-gray-600">{{ device.device }}</span>
-                        <span class="text-gray-800">{{ device.visits }}</span>
+                        <span class="text-gray-600 dark:text-gray-400">{{ device.device }}</span>
+                        <span class="text-gray-800 dark:text-gray-200">{{ device.visits }}</span>
                     </li>
                     {% endfor %}
                 </div>
             </ul>
         </div>
 
-        <div class="bg-white p-6 rounded-lg shadow-md">
+        <div class="bg-white dark:bg-gray-900 p-6 rounded-lg shadow-md">
             <ul class="divide-y divide-gray-100">
-                <li class="flex justify-between items-center py-2 sticky top-0 bg-white">
-                    <span class="text-gray-600">Browser</span>
-                    <span class="text-gray-600">Visitors</span>
+                <li class="flex justify-between items-center py-2 sticky top-0 bg-white dark:bg-slate-900">
+                    <span class="text-gray-600 dark:text-gray-200">Browser</span>
+                    <span class="text-gray-600 dark:text-gray-200">Visitors</span>
                 </li>
                 <div class="h-[300px] overflow-y-auto">
                     {% for browser in top_browsers %}
                     <li class="flex justify-between items-center py-2">
-                        <span class="text-gray-600">{{ browser.browser }}</span>
-                        <span class="text-gray-800">{{ browser.visits }}</span>
+                        <span class="text-gray-600 dark:text-gray-400">{{ browser.browser }}</span>
+                        <span class="text-gray-800 dark:text-gray-200">{{ browser.visits }}</span>
                     </li>
                     {% endfor %}
                 </div>

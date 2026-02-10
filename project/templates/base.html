@@ -1,5 +1,5 @@
 {% load static %}
-<html lang="en">
+<html lang="en" class="dark">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -11,11 +11,11 @@
     {% block head %}{% endblock %}
 </head>
 <body>
-    <body class="bg-gray-50 p-8">
+    <body class="dark:bg-slate-800 bg-gray-50 p-8">
         <div class="max-w-7xl mx-auto">
             <header>
                 <a href="/">
-                    <h1 class="text-2xl text-gray-800 mb-8">
+                    <h1 class="text-2xl text-gray-800 dark:text-gray-200 mb-8">
                     <img src="{% static 'logo.png' %}" alt="Bearlytics" class="w-8 h-8 inline-block">
                     {% comment %} Bearlytics {% endcomment %}
                     </h1>
