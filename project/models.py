@@ -23,9 +23,12 @@ class PageView(models.Model):
         db_table = 'pageviews'
         indexes = [
             models.Index(fields=['website', 'timestamp']),
+            models.Index(fields=['website', 'timestamp', 'path']),
+            models.Index(fields=['website', 'timestamp', 'referrer']),
             models.Index(fields=['website', 'timestamp', 'country']),
             models.Index(fields=['website', 'timestamp', 'device']),
             models.Index(fields=['website', 'timestamp', 'browser']),
+            models.Index(fields=['hash_id', 'path', 'timestamp']),
         ]
 
     def __str__(self):

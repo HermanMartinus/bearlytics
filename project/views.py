@@ -9,13 +9,11 @@ import geoip2
 
 from django.utils import timezone
 from django.db.models import Q
+from django.db import connection
 from django.shortcuts import get_object_or_404, render, redirect
 from django.contrib import messages
 from django.http import HttpResponse
 from django.db.models import Count
-from django.db.models.functions import RowNumber, TruncHour, TruncDay, TruncMonth, Concat
-from django.db.models import Subquery
-from django.db.models import Window
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import authenticate, login
 from django.contrib.gis.geoip2 import GeoIP2
@@ -173,12 +171,27 @@ def dashboard(request, website_id):
     # Add filters
     path_filter = request.GET.get('path')
     referrer_filter = request.GET.get('referrer')
-    
+
     if path_filter:
         base_query = base_query.filter(path=path_filter)
     if referrer_filter:
         base_query = base_query.filter(referrer=referrer_filter)
-    
+
+    where_conditions = [
+        'website_id = %s',
+        'timestamp BETWEEN %s AND %s'
+    ]
+    params = [website.id, start_time, end_time]
+
+    if path_filter:
+        where_conditions.append('path = %s')
+        params.append(path_filter)
+    if referrer_filter:
+        where_conditions.append('referrer = %s')
+        params.append(referrer_filter)
+
+    where_clause = ' AND '.join(where_conditions)
+
     def get_top_metrics(column, limit=100):
         """Helper function to get top metrics for a given column"""
         return (base_query
@@ -187,53 +200,106 @@ def dashboard(request, website_id):
                 visits=Count('hash_id', distinct=True)
             )
             .order_by('-visits')[:limit])
-    
-    # Get overall stats
-    stats = base_query.aggregate(
-        views=Count('hash_id'),
-        visits=Count(Concat('hash_id', 'path'), distinct=True),
-        visitors=Count('hash_id', distinct=True),
-        unique_pages=Count('path', distinct=True),
-        unique_browsers=Count('browser', distinct=True),
-        unique_countries=Count('country', distinct=True)
-    )
+
+    # Get overall stats using raw SQL for better performance
+    stats_sql = f"""
+        SELECT
+            COUNT(*) as views,
+            COUNT(DISTINCT hash_id || path) as visits,
+            COUNT(DISTINCT hash_id) as visitors,
+            COUNT(DISTINCT path) as unique_pages,
+            COUNT(DISTINCT browser) as unique_browsers,
+            COUNT(DISTINCT country) as unique_countries
+        FROM pageviews
+        WHERE {where_clause}
+    """
+
+    with connection.cursor() as cursor:
+        cursor.execute(stats_sql, params)
+        row = cursor.fetchone()
+        stats = {
+            'views': row[0],
+            'visits': row[1],
+            'visitors': row[2],
+            'unique_pages': row[3],
+            'unique_browsers': row[4],
+            'unique_countries': row[5]
+        }
     
     # Determine time grouping based on duration
     duration = end_time - start_time
     if duration <= timedelta(hours=24):
-        truncate_func = TruncHour
+        truncate_func = 'hour'
         date_format = '%Y-%m-%d %H:00'
     elif duration <= timedelta(days=90):
-        truncate_func = TruncDay
+        truncate_func = 'day'
         date_format = '%Y-%m-%d'
     else:
-        truncate_func = TruncMonth
+        truncate_func = 'month'
         date_format = '%Y-%m'
 
-    # Optimized time series query using Window function instead of subquery
-    time_series = (
-        base_query
-        .annotate(period=truncate_func('timestamp'))
-        .values('period')
-        .annotate(
-            views=Count('id'),
-            visits=Count(
-                'id',
-                filter=Q(
-                    id__in=Subquery(
-                        base_query.annotate(
-                            row_number=Window(
-                                expression=RowNumber(),
-                                partition_by=['hash_id', 'path'],
-                                order_by='timestamp'
-                            )
-                        ).filter(row_number=1).values('id')
-                    )
-                )
-            )
+    # Optimized time series query using raw SQL for better performance
+    # This is much faster than Window functions for large datasets
+    # Use strftime for SQLite datetime formatting (escape % for Django)
+    if truncate_func == 'hour':
+        period_format = '%%Y-%%m-%%d %%H:00:00'
+    elif truncate_func == 'day':
+        period_format = '%%Y-%%m-%%d 00:00:00'
+    else:  # month
+        period_format = '%%Y-%%m-01 00:00:00'
+
+    # Optimized query with better CTE structure
+    time_series_sql = f"""
+        WITH periods AS (
+            SELECT strftime('{period_format}', timestamp) as period
+            FROM pageviews
+            WHERE {where_clause}
+            GROUP BY period
+        ),
+        views_per_period AS (
+            SELECT
+                strftime('{period_format}', timestamp) as period,
+                COUNT(*) as view_count
+            FROM pageviews
+            WHERE {where_clause}
+            GROUP BY period
+        ),
+        first_visits AS (
+            SELECT
+                hash_id,
+                path,
+                MIN(timestamp) as first_timestamp
+            FROM pageviews
+            WHERE {where_clause}
+            GROUP BY hash_id, path
+        ),
+        visits_per_period AS (
+            SELECT
+                strftime('{period_format}', first_timestamp) as period,
+                COUNT(*) as visit_count
+            FROM first_visits
+            GROUP BY period
         )
-        .order_by('period')
-    )
+        SELECT
+            p.period,
+            COALESCE(v.view_count, 0) as views,
+            COALESCE(vp.visit_count, 0) as visits
+        FROM periods p
+        LEFT JOIN views_per_period v ON p.period = v.period
+        LEFT JOIN visits_per_period vp ON p.period = vp.period
+        ORDER BY p.period
+    """
+
+    # Need to repeat params for each WHERE clause in the CTEs
+    time_series_params = params * 3  # 3 CTEs use the where_clause
+
+    with connection.cursor() as cursor:
+        cursor.execute(time_series_sql, time_series_params)
+        columns = [col[0] for col in cursor.description]
+        time_series = [
+            dict(zip(columns, row))
+            for row in cursor.fetchall()
+        ]
     
     # Format time series data for the template
     time_labels = []
@@ -263,10 +329,19 @@ def dashboard(request, website_id):
         #         current = current.replace(month=current.month + 1)
     
     # Fill in actual data
-    time_data_map = {
-        ts['period'].strftime(date_format): (ts['views'], ts['visits']) 
-        for ts in time_series
-    }
+    # Period from raw SQL is already a formatted string
+    time_data_map = {}
+    for ts in time_series:
+        # Convert SQLite datetime string to Python datetime for formatting
+        period_str = ts['period']
+        if not period_str:
+            continue
+        try:
+            dt = timezone.datetime.strptime(period_str, '%Y-%m-%d %H:%M:%S')
+            formatted_period = dt.strftime(date_format)
+            time_data_map[formatted_period] = (ts['views'], ts['visits'])
+        except (ValueError, KeyError, TypeError) as e:
+            continue
     
     for i, label in enumerate(time_labels):
         if label in time_data_map:

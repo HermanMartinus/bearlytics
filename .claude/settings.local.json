@@ -5,7 +5,9 @@
       "Bash(python manage.py shell:*)",
       "Bash(python manage.py:*)",
       "Bash(pkill:*)",
-      "Bash(curl:*)"
+      "Bash(curl:*)",
+      "Bash(python test_dashboard_performance.py:*)",
+      "Bash(python:*)"
     ]
   }
 }
