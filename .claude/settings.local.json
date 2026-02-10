@@ -4,7 +4,8 @@
       "Bash(source venv/bin/activate)",
       "Bash(python manage.py shell:*)",
       "Bash(python manage.py:*)",
-      "Bash(pkill:*)"
+      "Bash(pkill:*)",
+      "Bash(curl:*)"
     ]
   }
 }
