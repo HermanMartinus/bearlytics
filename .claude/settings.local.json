@@ -1,0 +1,10 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(source venv/bin/activate)",
+      "Bash(python manage.py shell:*)",
+      "Bash(python manage.py:*)",
+      "Bash(pkill:*)"
+    ]
+  }
+}
